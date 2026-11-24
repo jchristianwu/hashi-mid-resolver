@@ -67,6 +67,9 @@ public class CredentialResolver {
     public static final String VAL_PRIVKEY = "privkey"; // the string privacy key for the credential
     public static final String VAL_CONTEXTNAME = "contextname"; // the string context name for the credential
     public static final String VAL_BEARER = "bearer_token"; // the string bearer token for the credential
+    public static final String VAL_TENANT_ID = "tenant_id"; // the string Azure tenant id for the credential
+    public static final String VAL_CLIENT_ID = "client_id"; // the string Azure client id for the credential
+    public static final String VAL_SECRET_KEY = "secret_key"; // the string Azure client secret for the credential
     public static final String PROP_ADDRESS = "mid.external_credentials.vault.address"; // The address of Vault Agent, as resolvable from the MID server
     public static final String PROP_CA = "mid.external_credentials.vault.ca"; // The custom CA to trust in PEM format
     public static final String PROP_TLS_SKIP_VERIFY = "mid.external_credentials.vault.tls_skip_verify"; // Whether to skip TLS verification
@@ -248,6 +251,9 @@ public class CredentialResolver {
         ValueAndSource privkey = valueAndSourceFromData(data, "privkey");
         ValueAndSource bearer = valueAndSourceFromData(data, "bearer_token");
         ValueAndSource contextname = valueAndSourceFromData(data, "contextname");
+        ValueAndSource tenantId = valueAndSourceFromData(data, VAL_TENANT_ID); // azure
+        ValueAndSource clientId = valueAndSourceFromData(data, VAL_CLIENT_ID); // azure
+        ValueAndSource secretKey = valueAndSourceFromData(data, VAL_SECRET_KEY); // azure, same key as the pswd lookup above
 
         System.err.printf("Setting values from fields %s=%s, %s=%s, %s=%s, %s=%s, %s=%s, %s=%s, %s=%s, %s=%s, %s=%s, %s=%s, %s=%s%n",
                 VAL_USER, username.source,
@@ -296,6 +302,15 @@ public class CredentialResolver {
         if (contextname.value != null) {
             result.put(VAL_CONTEXTNAME, contextname.value);
         }
+        if (tenantId.value != null) {
+            result.put(VAL_TENANT_ID, tenantId.value); // azure
+        }
+        if (clientId.value != null) {
+            result.put(VAL_CLIENT_ID, clientId.value); // azure
+        }
+        if (secretKey.value != null) {
+            result.put(VAL_SECRET_KEY, secretKey.value); // azure
+        }
 
         return result;
     }
@@ -342,7 +357,8 @@ public class CredentialResolver {
         infoblox                            (new String[]{VAL_USER, VAL_PKEY}),
         api_key                             (new String[]{VAL_USER, VAL_PKEY}),
         snmpv3                              (new String[]{VAL_USER, VAL_AUTHPROTO, VAL_AUTHKEY, VAL_PRIVPROTO, VAL_PRIVKEY, VAL_CONTEXTNAME}),
-        bearer                              (new String[]{VAL_BEARER});
+        bearer                              (new String[]{VAL_BEARER}),
+        azure                               (new String[]{VAL_TENANT_ID, VAL_CLIENT_ID, VAL_SECRET_KEY}); // type string MID sends for Azure
         private final String[] expectedFields;
 
         CredentialType(String[] expectedFields) {
